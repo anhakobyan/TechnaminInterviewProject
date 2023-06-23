@@ -30,7 +30,7 @@ public class Processor {
             DataRepository dataRepository = DataRepository.getInstance();
 
             ExecutorService executorService =
-                    new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+                    new ThreadPoolExecutor(3, 3, 0L, TimeUnit.MILLISECONDS,
                             new LinkedBlockingQueue<>());
 
             try (
