@@ -13,6 +13,7 @@ import org.bson.conversions.Bson;
 import org.apache.log4j.Logger;
 import technamin.data.Data;
 import technamin.db.MongoConnector;
+import technamin.services.Configuration;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -25,18 +26,17 @@ import static com.mongodb.client.model.Filters.eq;
 public class DataRepository {
 
     private static DataRepository dataRepository;
-    private MongoConnector mongoConnector;
-    private MongoCollection<Data> mongoCollection;
+    private final MongoCollection<Data> mongoCollection;
     final static Logger logger = Logger.getLogger(DataRepository.class);
 
     private DataRepository() {
         try {
-            mongoConnector = MongoConnector.getInstance();
+            MongoConnector mongoConnector = MongoConnector.getInstance();
             CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
                     MongoClientSettings.getDefaultCodecRegistry(),
                     CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())
             );
-            mongoCollection = mongoConnector.getDatabase("technamin").withCodecRegistry(codecRegistry).getCollection("data", Data.class);
+            mongoCollection = mongoConnector.getDatabase(Configuration.DB_NAME).withCodecRegistry(codecRegistry).getCollection("data", Data.class);
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }

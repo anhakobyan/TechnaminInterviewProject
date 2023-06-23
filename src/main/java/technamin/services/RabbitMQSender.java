@@ -4,22 +4,22 @@ import com.google.gson.JsonObject;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import org.apache.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 
 public class RabbitMQSender {
-
-    private final static String QUEUE_NAME = "mongoDB_metadata";
+    final static Logger logger = Logger.getLogger(RabbitMQSender.class);
 
     public static void send(JsonObject metadata) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
-            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+            channel.queueDeclare(Configuration.QUEUE, false, false, false, null);
             String message = metadata.toString();
-            channel.basicPublish("", QUEUE_NAME, null, message.getBytes(StandardCharsets.UTF_8));
-            System.out.println(" [x] Sent '" + message + "'");
+            channel.basicPublish("", Configuration.QUEUE, null, message.getBytes(StandardCharsets.UTF_8));
+            logger.info(" [x] Sent '" + message + "'");
         }
     }
 }
