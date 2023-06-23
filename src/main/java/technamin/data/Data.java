@@ -1,27 +1,29 @@
 package technamin.data;
 
-import java.sql.Timestamp;
+import java.util.Date;
+
 
 public class Data {
-    private String docId;
-    private Integer seqIs;
+
+    private String doc_id;
+    private Integer seq;
     private String data;
-    private Timestamp timeIs;
+    private Date time;
 
-    public String getDocId() {
-        return docId;
+    public String getDoc_id() {
+        return doc_id;
     }
 
-    public void setDocId(String docId) {
-        this.docId = docId;
+    public void setDoc_id(String doc_id) {
+        this.doc_id = doc_id;
     }
 
-    public Integer getSeqIs() {
-        return seqIs;
+    public Integer getSeq() {
+        return seq;
     }
 
-    public void setSeqIs(Integer seqIs) {
-        this.seqIs = seqIs;
+    public void setSeq(Integer seq) {
+        this.seq = seq;
     }
 
     public String getData() {
@@ -32,11 +34,11 @@ public class Data {
         this.data = data;
     }
 
-    public Timestamp getTimeIs() {
-        return timeIs;
+    public Date getTime() {
+        return time;
     }
 
-    public void setTimeIs(Timestamp timeIs) {
-        this.timeIs = timeIs;
+    public void setTime(Date time) {
+        this.time = time;
     }
 }

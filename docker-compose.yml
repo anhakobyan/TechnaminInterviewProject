@@ -1,0 +1,29 @@
+# docker-compose.yml
+version: '3.1' #format version for this docker compose file
+services:
+  mongo-container:
+    image: arm64v8/mongo:4.0
+    platform: linux/arm64/v8
+    environment:
+        - MONGO_INITDB_ROOT_USERNAME=root
+        - MONGO_INITDB_ROOT_PASSWORD=root
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # Here you are setting the username and password
+        # so change it to whatever you want
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ports:
+      - "27018:27017"
+    command: mongod
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+networks:
+  default:
+    driver: bridge
