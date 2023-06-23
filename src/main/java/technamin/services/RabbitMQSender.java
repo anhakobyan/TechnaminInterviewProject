@@ -13,7 +13,7 @@ public class RabbitMQSender {
 
     public static void send(JsonObject metadata) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost(Configuration.RABBITMQ_HOST);
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
             channel.queueDeclare(Configuration.QUEUE, false, false, false, null);

@@ -7,7 +7,8 @@ import java.io.*;
 
 public class Configuration {
     final static Logger logger = Logger.getLogger(Configuration.class);
-    public static final String FILE_PATH;
+    public static String FILE_PATH;
+    public static String RABBITMQ_HOST;
     public static String QUEUE;
     public static String DB_HOST;
     public static Integer DB_PORT;
@@ -18,11 +19,12 @@ public class Configuration {
 
     static {
         Properties p = new Properties();
-        FileReader reader;
         try {
-            reader = new FileReader("application.properties");
+            ClassLoader classLoader = Configuration.class.getClassLoader();
+            File file = new File(classLoader.getResource("application.properties").getFile());
+            InputStream inputStream = new FileInputStream(file);
             try {
-                p.load(reader);
+                p.load(inputStream);
             } catch (IOException e) {
                 logger.error("unable to load properties", e);
             }
@@ -30,6 +32,7 @@ public class Configuration {
             logger.error("wrong path for properties", e);
         }
         FILE_PATH = p.getProperty("file.path");
+        RABBITMQ_HOST = p.getProperty("rabbitMQ.host");
         QUEUE = p.getProperty("rabbitMQ.queue");
         DB_HOST = p.getProperty("db.host");
         DB_PORT = Integer.parseInt(p.getProperty("db.port"));
