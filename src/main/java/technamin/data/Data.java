@@ -1,28 +1,29 @@
 package technamin.data;
 
-import java.util.Date;
+import org.bson.codecs.pojo.annotations.BsonId;
 
 
 public class Data {
 
-    private String doc_id;
-    private Integer seq;
+    @BsonId
+    private Long doc_id;
+    private Long seq;
     private String data;
-    private Date time;
+    private Long time;
 
-    public String getDoc_id() {
+    public Long getDoc_id() {
         return doc_id;
     }
 
-    public void setDoc_id(String doc_id) {
+    public void setDoc_id(Long doc_id) {
         this.doc_id = doc_id;
     }
 
-    public Integer getSeq() {
+    public Long getSeq() {
         return seq;
     }
 
-    public void setSeq(Integer seq) {
+    public void setSeq(Long seq) {
         this.seq = seq;
     }
 
@@ -34,11 +35,11 @@ public class Data {
         this.data = data;
     }
 
-    public Date getTime() {
+    public Long getTime() {
         return time;
     }
 
-    public void setTime(Date time) {
+    public void setTime(Long time) {
         this.time = time;
     }
 }

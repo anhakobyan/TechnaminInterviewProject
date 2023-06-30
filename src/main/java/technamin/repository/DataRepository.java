@@ -50,7 +50,7 @@ public class DataRepository {
     }
 
     public Optional<JsonObject> saveOrUpdate(Data data) {
-        Data oldData = this.mongoCollection.find(eq("doc_id", data.getDoc_id())).first();
+        Data oldData = this.mongoCollection.find(eq("_id", data.getDoc_id())).first();
         JsonObject updateMetadata = new JsonObject();
         if (oldData == null) {
             mongoCollection.insertOne(data);
@@ -75,7 +75,7 @@ public class DataRepository {
                 updatedFields.add("time");
             }
             if (!updatedFields.isEmpty()) {
-                mongoCollection.updateOne(eq("doc_id", data.getDoc_id()), Updates.combine(updates));
+                mongoCollection.updateOne(eq("_id", data.getDoc_id()), Updates.combine(updates));
                 updateMetadata.add("fields", updatedFields);
                 logger.info("data for doc_id:" + data.getDoc_id() + " updated");
             } else {

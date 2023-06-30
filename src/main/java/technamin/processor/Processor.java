@@ -1,52 +1,54 @@
 package technamin.processor;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import technamin.data.Data;
 import technamin.repository.DataRepository;
+import org.json.simple.JSONObject;
 import technamin.services.RabbitMQSender;
 
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class Processor {
     final static Logger logger = Logger.getLogger(Processor.class);
 
     public static void startTheProcess(String path) {
         try {
-            DataRepository dataRepository = DataRepository.getInstance();
-
             ExecutorService executorService =
                     new ThreadPoolExecutor(3, 3, 0L, TimeUnit.MILLISECONDS,
                             new LinkedBlockingQueue<>());
+            DataRepository dataRepository = DataRepository.getInstance();
+            JSONParser parser = new JSONParser();
+            JSONArray inputArray = (JSONArray) parser.parse(new FileReader(path));
 
-            try (
-                    InputStream inputStream = Files.newInputStream(Path.of(path));
-                    JsonReader reader = new JsonReader(new InputStreamReader(inputStream))
-            ) {
-                Gson gson = new GsonBuilder().registerTypeAdapter(Date.class,
-                        (JsonDeserializer<Date>) (jsonElement, type, context) ->
-                                new Date(jsonElement.getAsJsonPrimitive().getAsLong())).create();
-                reader.beginArray();
-                while (reader.hasNext()) {
-                    Data data = gson.fromJson(reader, Data.class);
-                    logger.info("read from the file: data " + data);
-                    executorService.submit(() -> {
-                        logger.info("write to mongoDb: data " + data);
-                        Optional<JsonObject> updateInfo = dataRepository.saveOrUpdate(data);
+            List<Data> dataList = new ArrayList<>();
+            for (Object inputObject : inputArray) {
+                Data item = new Data();
+
+                JSONObject obj = (JSONObject) inputObject;
+                item.setDoc_id((Long) obj.get("doc_id"));
+                item.setSeq((Long) obj.get("seq"));
+                item.setData((String) obj.get("data"));
+                item.setTime((Long) obj.get("time"));
+
+                dataList.add(item);
+            }
+
+            Map<Long, List<Data>> dataListGrouped =
+                    dataList.stream().collect(Collectors.groupingBy(Data::getDoc_id));
+            dataListGrouped.forEach((doc_id, groupedList) ->
+                    executorService.submit(() -> groupedList.forEach(b -> {
+                        Optional<JsonObject> updateInfo = dataRepository.saveOrUpdate(b);
                         if (updateInfo.isPresent()) {
                             try {
                                 logger.info("write to rabbitMQ: metadata " + updateInfo);
@@ -55,10 +57,10 @@ public class Processor {
                                 logger.error("Unable send data to rabbitMQ", e);
                             }
                         }
-                    });
-                }
-            }
+                    })));
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ParseException e) {
             throw new RuntimeException(e);
         }
     }
